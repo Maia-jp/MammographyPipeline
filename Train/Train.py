@@ -17,6 +17,7 @@ import onnxmltools
 import segmentation_models as sm
 
 from ..Util import *
+from .Generator import CustomGenerator
 
 def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
 
