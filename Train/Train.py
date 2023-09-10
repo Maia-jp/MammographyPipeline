@@ -17,8 +17,10 @@ from tensorflow.keras.callbacks import History, EarlyStopping, ModelCheckpoint, 
 import onnxmltools
 import segmentation_models as sm
 
+import tf2onnx
 
-from .Generator import CustomGenerator, teste
+
+from .Generator import CustomGenerator
 from ..Util.Util import safe_make_folder
 from ..Util import SQLogger
 
@@ -95,7 +97,11 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
 
     logger.close()
     model.load_weights(os.path.join(training_results_folder,'weights.h5'))
-    model.save(os.path.join(training_results_folder,'model.h5'))
+    
+    onnx_model, _ = tf2onnx.convert.from_keras(model)
 
+    tf2onnx.save_model(onnx_model, os.path.join(training_results_folder,'model.onnx'))
+
+    return model
     # onnx_model_ss_structures_of_interest = onnxmltools.convert_keras(model, target_opset=12)
     # onnxmltools.utils.save_model(onnx_model_ss_structures_of_interest, os.path.join(training_results_folder,'model.onnx'))
