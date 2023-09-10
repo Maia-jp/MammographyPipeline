@@ -18,7 +18,7 @@ import segmentation_models as sm
 
 from ..Util import *
 
-def train(dataset_folder = os.environ["DATASET_FOLDER"]):
+def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
 
     gpus = tf.config.experimental.list_physical_devices('GPU')
     if gpus:
