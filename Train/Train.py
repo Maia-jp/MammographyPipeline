@@ -45,7 +45,7 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
     sm.set_framework('tf.keras')
     sm.framework()
 
-    execution_name = f"execution_{datetime.now()}"
+    execution_name = "execution_"+datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     training_results_folder =  os.environ["RESULTS_FOLDER"] + execution_name
     safe_make_folder(training_results_folder)
 
