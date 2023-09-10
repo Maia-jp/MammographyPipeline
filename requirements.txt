@@ -1,0 +1,13 @@
+matplotlib
+scikit-learn
+pandas
+opencv-python
+scikit-image
+joblib
+h5py
+pynrrd
+numpy
+image-classifiers==1.0.0
+Keras-Applications==1.0.8
+efficientnet==1.0.0
+segmentation-models
