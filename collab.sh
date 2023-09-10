@@ -1,4 +1,4 @@
-pip install -r requirements.txt
+pip install -r ./requirements.txt
 pip install onnx
 pip install git+https://github.com/microsoft/onnxconverter-common
 pip install git+https://github.com/onnx/onnxmltools
