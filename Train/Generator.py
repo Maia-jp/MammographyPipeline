@@ -196,8 +196,3 @@ def test_generator(dataset_folder = os.environ["DATASET_FOLDER"]):
             axs[j,5].imshow(batchy[j,:,:,4], cmap='gray')
         fig.savefig(os.path.join(gen_folder,str(i)))
         plt.close(fig)
-
-
-
-def teste():
-    print("here")
