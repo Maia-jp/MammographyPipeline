@@ -8,7 +8,6 @@ import random
 from skimage import img_as_uint, img_as_float, exposure, draw
 import skimage.io as io
 from datetime import datetime
-import tensorflow as tf
 
 from ..Util.Util import safe_make_folder
 
@@ -69,10 +68,10 @@ def compute_iou(in_mask_gt, in_mask_pred):
         return intersection/union
 
 
-def numerical_evaluation(model_path:str):
-    # import onnxruntime as ort
+def numerical_evaluation(modelPath:str):
+    import onnxruntime as ort
 
-    model = tf.keras.models.load_model(model_path)
+    model = ort.InferenceSession(modelPath, providers=['CUDAExecutionProvider']) #loading model
     model_input_name = model.get_inputs()[0].name #getting input name for the model
     model.run(None, {model_input_name: np.zeros((1,384,384,1),dtype=np.float32)})
 
