@@ -3,4 +3,5 @@ from dotenv import load_dotenv
 from dotenv import load_dotenv
 import os
 
-load_dotenv('collab.env')
+def configure():
+    os.load_dotenv('collab.env')
