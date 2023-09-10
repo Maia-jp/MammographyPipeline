@@ -5,6 +5,7 @@ import re
 from datetime import datetime
 
 import cv2
+import csv
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -18,10 +19,12 @@ import segmentation_models as sm
 
 from ..Util import safe_make_folder
 from .Generator import CustomGenerator, teste
+from ..Util import SQLogger
 
 teste()
 
 def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
+    logger = SQLogger.ExperimentLogger(os.environ["DBLOG_FOLDER"])
 
     gpus = tf.config.experimental.list_physical_devices('GPU')
     if gpus:
@@ -43,7 +46,7 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
     sm.set_framework('tf.keras')
     sm.framework()
 
-    execution_name = "execution_"+datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%p")
+    execution_name = "execution_"+datetime.now()
     training_results_folder =  os.environ["RESULTS_FOLDER"] + execution_name
     safe_make_folder(training_results_folder)
 
@@ -65,6 +68,8 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
     csv_logger = CSVLogger(os.path.join(training_results_folder,'history.csv'))
     callbacks_list = [early_stop, model_checkpoint, csv_logger]
 
+    logger.create_experiment(execution_name, 'UNET', os.path.basename(os.path.normpath(dataset_folder)))
+
     model.fit(
             train_generator,
             steps_per_epoch=len(train_generator),
@@ -74,7 +79,23 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
             callbacks=callbacks_list,
             shuffle=True,
             verbose=1)
+    
+    # Append the contents of history.csv to the History table
+    experiment_id = execution_name
+    with open(os.path.join(training_results_folder, 'history.csv'), 'r') as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+        next(csv_reader)  # Skip the header row
+        for row in csv_reader:
+            epoch = int(row['epoch'])
+            iou_score = float(row['iou_score'])
+            loss = float(row['loss'])
+            val_iou_score = float(row['val_iou_score'])
+            val_loss = float(row['val_loss'])
+        
+        # Log the history entry into the History table
+        logger.log_history(experiment_id, epoch, iou_score, loss, val_iou_score, val_loss)
 
+    logger.close()
     model.load_weights(os.path.join(training_results_folder,'weights.h5'))
 
     onnx_model_ss_structures_of_interest = onnxmltools.convert_keras(model, target_opset=12)
