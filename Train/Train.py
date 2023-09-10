@@ -22,8 +22,6 @@ from .Generator import CustomGenerator, teste
 from ..Util.Util import safe_make_folder
 from ..Util import SQLogger
 
-teste()
-
 def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
     logger = SQLogger.ExperimentLogger(os.environ["DBLOG_FOLDER"])
 
@@ -47,7 +45,7 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
     sm.set_framework('tf.keras')
     sm.framework()
 
-    execution_name = "execution_"+datetime.now()
+    execution_name = f"execution_{datetime.now()}"
     training_results_folder =  os.environ["RESULTS_FOLDER"] + execution_name
     safe_make_folder(training_results_folder)
 
