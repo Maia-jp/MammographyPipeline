@@ -67,7 +67,7 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
     csv_logger = CSVLogger(os.path.join(training_results_folder,'history.csv'))
     callbacks_list = [early_stop, model_checkpoint, csv_logger]
 
-    logger.create_experiment(execution_name, 'UNET', os.path.basename(os.path.normpath(dataset_folder)))
+    logger.create_experiment(execution_name, 'UNET_efficientnetb3', os.path.basename(os.path.normpath(dataset_folder)))
 
     model.fit(
             train_generator,
