@@ -16,7 +16,7 @@ from tensorflow.keras.callbacks import History, EarlyStopping, ModelCheckpoint, 
 import onnxmltools
 import segmentation_models as sm
 
-from ..Util import *
+from ..Util.Util import safe_make_folder
 
 __all__ = ['CustomGenerator',
            'test_generator'

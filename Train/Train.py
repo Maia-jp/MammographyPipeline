@@ -17,8 +17,9 @@ from tensorflow.keras.callbacks import History, EarlyStopping, ModelCheckpoint, 
 import onnxmltools
 import segmentation_models as sm
 
-from ..Util import safe_make_folder
+
 from .Generator import CustomGenerator, teste
+from ..Util.Util import safe_make_folder
 from ..Util import SQLogger
 
 teste()
