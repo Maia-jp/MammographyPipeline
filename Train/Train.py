@@ -90,9 +90,8 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
             loss = float(row['loss'])
             val_iou_score = float(row['val_iou_score'])
             val_loss = float(row['val_loss'])
-        
-        # Log the history entry into the History table
-        logger.log_history(experiment_id, epoch, iou_score, loss, val_iou_score, val_loss)
+            # Log the history entry into the History table
+            logger.log_history(experiment_id, epoch, iou_score, loss, val_iou_score, val_loss)
 
     logger.close()
     # model.load_weights(os.path.join(training_results_folder,'weights.h5'))
