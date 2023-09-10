@@ -1,4 +1,4 @@
-pip install -r /content/drive/MyDrive/Faculdade/TCC/sample_code/mammography_segmentation/Cópia de requirements.txt
+pip install -r /content/drive/MyDrive/Faculdade/TCC/sample_code/mammography_segmentation/requirements.txt
 pip install onnx
 pip install git+https://github.com/microsoft/onnxconverter-common
 pip install git+https://github.com/onnx/onnxmltools
