@@ -18,6 +18,10 @@ import segmentation_models as sm
 
 from ..Util import *
 
+__all__ = ['CustomGenerator',
+           'test_generator'
+           ]
+
 class CustomGenerator(tf.keras.utils.Sequence):
     def __init__(self, csv_filename, image_folder, label_folder, input_size=(384,384), batch_size=4, n_classes=5, shuffle=False, use_augmentation=False):
         """

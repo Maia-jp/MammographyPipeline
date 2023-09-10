@@ -16,8 +16,8 @@ from tensorflow.keras.callbacks import History, EarlyStopping, ModelCheckpoint, 
 import onnxmltools
 import segmentation_models as sm
 
-from ..Util import *
-from .Generator import *
+from ..Util import safe_make_folder
+from .Generator import CustomGenerator
 
 def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
 
