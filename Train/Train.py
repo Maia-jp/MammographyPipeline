@@ -74,7 +74,7 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
     model.fit(
             train_generator,
             steps_per_epoch=len(train_generator),
-            epochs=200,
+            epochs=int(os.environ["EPOCHS"]),
             validation_data=validation_generator,
             validation_steps=len(validation_generator),
             callbacks=callbacks_list,
@@ -102,6 +102,6 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
 
     # tf2onnx.save_model(onnx_model, os.path.join(training_results_folder,'model.onnx'))
 
-    onnx_model_ss_structures_of_interest = onnxmltools.convert_keras(model, target_opset=12)
-    onnxmltools.utils.save_model(onnx_model_ss_structures_of_interest, os.path.join(training_results_folder,'model.onnx'))
+    # onnx_model_ss_structures_of_interest = onnxmltools.convert_keras(model, target_opset=12)
+    # onnxmltools.utils.save_model(onnx_model_ss_structures_of_interest, os.path.join(training_results_folder,'model.onnx'))
     return model
