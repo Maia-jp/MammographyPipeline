@@ -10,6 +10,7 @@ import skimage.io as io
 from datetime import datetime
 
 from ..Util.Util import safe_make_folder
+from ..Util import SQLogger
 
 def create_vis_pred_img(img,nipple_mask,pectoral_mask,fibroglandular_tissue_mask,fatty_tissue_mask):
     pred_vis = np.zeros((img.shape[0],img.shape[1],3),dtype=np.uint8)
@@ -70,6 +71,7 @@ def compute_iou(in_mask_gt, in_mask_pred):
 
 def numerical_evaluation(modelPath:str):
     import onnxruntime as ort
+    logger = SQLogger.ExperimentLogger(os.environ["DBLOG_FOLDER"])
 
     model = ort.InferenceSession(modelPath, providers=['CUDAExecutionProvider']) #loading model
     model_input_name = model.get_inputs()[0].name #getting input name for the model
@@ -127,7 +129,8 @@ def numerical_evaluation(modelPath:str):
         pectoral_iou = compute_iou(pectoral_mask_gt,pectoral_mask)
         fibroglandular_tissue_iou = compute_iou(fibroglandular_tissue_mask_gt,fibroglandular_tissue_mask)
         fatty_tissue_iou = compute_iou(fatty_tissue_mask_gt,fatty_tissue_mask)
-
+        logger.log_evaluation(modelPath.split('/')[-2], datetime.now(), os.path.basename(os.path.normpath(dataset_folder)), filename, nipple_iou, pectoral_iou, fibroglandular_tissue_iou, fatty_tissue_iou)
+        
         iou_data.append([filename,nipple_iou,pectoral_iou,fibroglandular_tissue_iou,fatty_tissue_iou])
 
         pred_vis = create_vis_pred_img(img_original,nipple_mask,pectoral_mask,fibroglandular_tissue_mask,fatty_tissue_mask)
@@ -144,7 +147,8 @@ def numerical_evaluation(modelPath:str):
         full_vis = cv2.hconcat([cv2.cvtColor(img_original,cv2.COLOR_GRAY2RGB), gt_vis, pred_vis])
         full_vis_filename = os.path.join(full_vis_path,filename)
         io.imsave(full_vis_filename,full_vis)
-
+    
+    logger.close()
     df = pd.DataFrame(iou_data, columns =['Filename', 'Nipple IoU', 'Pectoral IoU', 'Fibr. tissue IoU', 'Fatty tissue IoU'])
     df.to_csv(iou_data_filename)
 
