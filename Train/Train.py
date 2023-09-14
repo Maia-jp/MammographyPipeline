@@ -85,7 +85,6 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
     experiment_id = execution_name
     with open(os.path.join(training_results_folder, 'history.csv'), 'r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
-        next(csv_reader)  # Skip the header row
         for row in csv_reader:
             epoch = int(row['epoch'])
             iou_score = float(row['iou_score'])
@@ -97,11 +96,7 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
 
     logger.close()
     model.load_weights(os.path.join(training_results_folder,'weights.h5'))
-    
-    # onnx_model, _ = tf2onnx.convert.from_keras(model)
-
-    # tf2onnx.save_model(onnx_model, os.path.join(training_results_folder,'model.onnx'))
 
     onnx_model_ss_structures_of_interest = onnxmltools.convert_keras(model, target_opset=12)
     onnxmltools.utils.save_model(onnx_model_ss_structures_of_interest, os.path.join(training_results_folder,'model.onnx'))
-    return model
+    return model, os.path.join(training_results_folder,'model.onnx')

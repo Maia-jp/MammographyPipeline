@@ -13,7 +13,7 @@ class ExperimentLogger:
         self.conn.commit()
 
     def log_evaluation(self, experiment_id, created_at, dataset, filename, nipple_iou, pectoral_iou, fibroglandular_tissue_iou, fatty_tissue_iou):                            
-           self.cursor.execute("INSERT INTO Evaluation (id, created_at, dataset, 'Filename', 'Nipple IoU', 'Pectoral IoU', 'Fibr. tissue IoU', 'Fatty tissue IoU') VALUES (?,    ?, ?, ?, ?, ?, ?)",                                                                                                                                                           
+           self.cursor.execute("INSERT INTO Evaluation (id, created_at, dataset, 'Filename', 'Nipple IoU', 'Pectoral IoU', 'Fibr. tissue IoU', 'Fatty tissue IoU') VALUES (?, ?, ?, ?, ?, ?, ?, ?)",                                                                                                                                                           
                                (experiment_id, created_at, dataset, filename, nipple_iou, pectoral_iou, fibroglandular_tissue_iou, fatty_tissue_iou))                            
            self.conn.commit()   
 
