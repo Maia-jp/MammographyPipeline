@@ -69,7 +69,7 @@ def compute_iou(in_mask_gt, in_mask_pred):
         return intersection/union
 
 
-def numerical_evaluation(modelPath:str):
+def numerical_evaluation(modelPath:str,dataset_evaluation_folder=os.environ["EVALUATION_DATASET_FOLDER"]):
     import onnxruntime as ort
     logger = SQLogger.ExperimentLogger(os.environ["DBLOG_FOLDER"])
 
@@ -88,7 +88,12 @@ def numerical_evaluation(modelPath:str):
     safe_make_folder(gt_vis_path)
     safe_make_folder(image_vis_path)
     safe_make_folder(full_vis_path)
-    dataset_folder = os.environ["DATASET_FOLDER"]
+
+    #
+    # Start Evaluating 
+    #
+    
+    dataset_folder = dataset_evaluation_folder
     #dataset_folder = "data/datasets/mlo-hologic2"
     image_folder=os.path.join(dataset_folder,"image")
     label_folder=os.path.join(dataset_folder,"label")
