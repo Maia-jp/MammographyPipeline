@@ -100,10 +100,17 @@ class CustomGenerator(tf.keras.utils.Sequence):
     def resize_data(self, img, label_map):
         'Resizes the input image and the input label image to the target size'
         size = (self.input_size[1], self.input_size[0])
-        resized_img = cv2.resize(img, size, interpolation=cv2.INTER_NEAREST)
-        resized_img = resized_img.reshape((resized_img.shape[0], resized_img.shape[1], 1))
-        resized_label_map = cv2.resize(label_map, size, interpolation=cv2.INTER_NEAREST)
-        return resized_img, resized_label_map
+        
+        # Convert the input image to grayscale
+        gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        resized_gray_img = cv2.resize(gray_img, size, interpolation=cv2.INTER_NEAREST)
+        resized_gray_img = resized_gray_img.reshape((resized_gray_img.shape[0], resized_gray_img.shape[1], 1))
+        
+        # Convert the label map image to grayscale
+        gray_label_map = cv2.cvtColor(label_map, cv2.COLOR_BGR2GRAY)
+        resized_gray_label_map = cv2.resize(gray_label_map, size, interpolation=cv2.INTER_NEAREST)
+        
+        return resized_gray_img, resized_gray_label_map
 
     def get_raw_batch_data(self, current_indexes):
         """
