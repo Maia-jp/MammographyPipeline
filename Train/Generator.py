@@ -97,38 +97,13 @@ class CustomGenerator(tf.keras.utils.Sequence):
         label_map = t_label_map[:, :, 0]
         return img, label_map
 
-
-    def resize_data(self, img_path):
-        'Resizes the input image to the target size'
+    def resize_data(self, img, label_map):
+        'Resizes the input image and the input label image to the target size'
         size = (self.input_size[1], self.input_size[0])
-        
-        # Read the PNG image
-        img = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
-        
-        if img.shape[2] == 4:  # Image has two layers (RGBA)
-            # Separate the layers
-            layer1 = img[:, :, 0:3]  # First layer (RGB channels)
-            layer2 = img[:, :, 3]    # Second layer (Alpha channel)
-            
-            # Convert the first layer to grayscale
-            gray_img = cv2.cvtColor(layer1, cv2.COLOR_BGR2GRAY)
-            
-            # Resize the grayscale image
-            resized_gray_img = cv2.resize(gray_img, size, interpolation=cv2.INTER_NEAREST)
-            resized_gray_img = resized_gray_img.reshape((resized_gray_img.shape[0], resized_gray_img.shape[1], 1))
-            
-            return resized_gray_img, layer2  # Return resized grayscale image and second layer (unchanged)
-        
-        elif img.shape[2] == 3:  # Image has one layer (RGB)
-            # Convert the image to grayscale
-            gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            
-            # Resize the grayscale image
-            resized_gray_img = cv2.resize(gray_img, size, interpolation=cv2.INTER_NEAREST)
-            resized_gray_img = resized_gray_img.reshape((resized_gray_img.shape[0], resized_gray_img.shape[1], 1))
-            
-            return resized_gray_img  # Return resized grayscale image
-
+        resized_img = cv2.resize(img, size, interpolation=cv2.INTER_NEAREST)
+        resized_img = resized_img.reshape((resized_img.shape[0], resized_img.shape[1], 1))
+        resized_label_map = cv2.resize(label_map, size, interpolation=cv2.INTER_NEAREST)
+        return resized_img, resized_label_map
 
     def get_raw_batch_data(self, current_indexes):
         """
@@ -144,7 +119,8 @@ class CustomGenerator(tf.keras.utils.Sequence):
         label_maps = []
 
         for i in range(len(current_indexes)):
-            img = io.imread(os.path.join(self.image_folder, self.filenames[current_indexes[i]]))
+            img = io.imread(os.path.join(self.image_folder, self.filenames[current_indexes[i]]), as_gray=True)
+
             img = img.reshape((img.shape[0], img.shape[1], 1))
             images.append(img)
             label_map = io.imread(os.path.join(self.label_folder, self.filenames[current_indexes[i]]))
