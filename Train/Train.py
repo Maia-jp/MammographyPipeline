@@ -102,9 +102,17 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
     return model, os.path.join(training_results_folder,'model.onnx')
 
 
-def Train_StylizedDataset(model, dataset_folder: str):
-    logger = SQLogger.ExperimentLogger(os.environ["DBLOG_FOLDER"])
 
+
+def Train_StylizedDataset(modelPath:str, dataset_folder: str):
+    logger = SQLogger.ExperimentLogger(os.environ["DBLOG_FOLDER"])
+    
+    import onnxruntime as ort
+    # model = ort.InferenceSession('data/results/training/execution_2023_08_07_19_06_39_PM/model.onnx', providers=['CUDAExecutionProvider']) #loading model
+    model = ort.InferenceSession(modelPath, providers=['CUDAExecutionProvider']) #loading model
+    model_input_name = model.get_inputs()[0].name #getting input name for the model
+    model.run(None, {model_input_name: np.zeros((1,384,384,1),dtype=np.float32)})
+    
     gpus = tf.config.experimental.list_physical_devices('GPU')
     if gpus:
         try:
