@@ -104,53 +104,49 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
 
 
 
-def Train_StylizedDataset(modelPath:str, dataset_folder: str):
+def Train_StylizedDataset(model_path: str, dataset_folder: str):
     logger = SQLogger.ExperimentLogger(os.environ["DBLOG_FOLDER"])
-    
-    import onnxruntime as ort
-    # model = ort.InferenceSession('data/results/training/execution_2023_08_07_19_06_39_PM/model.onnx', providers=['CUDAExecutionProvider']) #loading model
-    model = ort.InferenceSession(modelPath, providers=['CUDAExecutionProvider']) #loading model
-    model_input_name = model.get_inputs()[0].name #getting input name for the model
-    model.run(None, {model_input_name: np.zeros((1,384,384,1),dtype=np.float32)})
-    
+
+    # Load the model using TensorFlow/Keras
+    model = tf.keras.models.load_model(model_path)
+
     gpus = tf.config.experimental.list_physical_devices('GPU')
     if gpus:
         try:
             for gpu in gpus:
                 tf.config.experimental.set_memory_growth(gpu, True)
 
-            if(len(gpus) > 1 ):
-                #mirrored_strategy = tf.distribute.MirroredStrategy()
+            if len(gpus) > 1:
                 tf.config.experimental.set_visible_devices(gpus[1], 'GPU')
+
             logical_gpus = tf.config.experimental.list_logical_devices('GPU')
             print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
 
         except RuntimeError as e:
-            # Memory growth must be set before GPUs have been initialized
             print(e)
-
 
     sm.set_framework('tf.keras')
     sm.framework()
 
-    execution_name =  "retrained_execution_" + datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%p")
-    training_results_folder =  os.environ["RESULTS_FOLDER"] + execution_name
+    execution_name = "retrained_execution_" + datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%p")
+    training_results_folder = os.environ["RESULTS_FOLDER"] + execution_name
     safe_make_folder(training_results_folder)
 
-    image_folder=os.path.join(dataset_folder,"image")
-    label_folder=os.path.join(dataset_folder,"label")
-    training_csv_filename=os.path.join(dataset_folder,"training.csv")
-    validation_csv_filename=os.path.join(dataset_folder,"validation.csv")
+    image_folder = os.path.join(dataset_folder, "image")
+    label_folder = os.path.join(dataset_folder, "label")
+    training_csv_filename = os.path.join(dataset_folder, "training.csv")
+    validation_csv_filename = os.path.join(dataset_folder, "validation.csv")
 
     train_generator = CustomGenerator(training_csv_filename, image_folder, label_folder, shuffle=True, use_augmentation=True)
     validation_generator = CustomGenerator(validation_csv_filename, image_folder, label_folder, shuffle=False, use_augmentation=False)
 
     # Compile the model with the previous configuration
-    model.compile('Adam', loss=sm.losses.categorical_focal_jaccard_loss, metrics=[sm.metrics.iou_score])
+    model.compile(optimizer='Adam', loss=sm.losses.categorical_focal_jaccard_loss, metrics=[sm.metrics.iou_score])
 
     # Define callbacks for the new training
     new_callbacks_list = [EarlyStopping(monitor='val_loss', patience=30),
-                          ModelCheckpoint(os.path.join(training_results_folder, 'weights.h5'), save_weights_only=True, save_best_only=True, mode='auto'),
+                          ModelCheckpoint(os.path.join(training_results_folder, 'weights.h5'), save_weights_only=True,
+                                          save_best_only=True, mode='auto'),
                           CSVLogger(os.path.join(training_results_folder, 'history.csv'))]
 
     # Log the new experiment
@@ -168,23 +164,23 @@ def Train_StylizedDataset(modelPath:str, dataset_folder: str):
         verbose=1
     )
 
-    # Similar to what you did in train_UNET, log the history
+    # Log the history
     experiment_id = execution_name
-    with open(os.path.join(training_results_folder, 'history.csv'), 'r') as csv_file:
-        csv_reader = csv.DictReader(csv_file)
-        for row in csv_reader:
-            epoch = int(row['epoch'])
-            iou_score = float(row['iou_score'])
-            loss = float(row['loss'])
-            val_iou_score = float(row['val_iou_score'])
-            val_loss = float(row['val_loss'])
-            # Log the history entry into the History table
-            logger.log_history(experiment_id, epoch, iou_score, loss, val_iou_score, val_loss)
+    history_file_path = os.path.join(training_results_folder, 'history.csv')
+    if os.path.exists(history_file_path):
+        with open(history_file_path, 'r') as csv_file:
+            csv_reader = csv.DictReader(csv_file)
+            for row in csv_reader:
+                epoch = int(row['epoch'])
+                iou_score = float(row['iou_score'])
+                loss = float(row['loss'])
+                val_iou_score = float(row['val_iou_score'])
+                val_loss = float(row['val_loss'])
+                # Log the history entry into the History table
+                logger.log_history(experiment_id, epoch, iou_score, loss, val_iou_score, val_loss)
 
     # Save the retrained model to ONNX format
-    model.load_weights(os.path.join(training_results_folder, 'weights.h5'))
-    onnx_model_ss_structures_of_interest = onnxmltools.convert_keras(model, target_opset=12)
-    onnxmltools.utils.save_model(onnx_model_ss_structures_of_interest, os.path.join(training_results_folder, 'model.onnx'))
+    model.save_weights(os.path.join(training_results_folder, 'weights.h5'))
+    tf.saved_model.save(model, os.path.join(training_results_folder, 'saved_model'))
 
-    # Return the retrained model and its ONNX representation
-    return model, os.path.join(training_results_folder, 'model.onnx')
+    return model, os.path.join(training_results_folder, 'saved_model')
