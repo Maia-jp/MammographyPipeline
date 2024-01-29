@@ -184,6 +184,19 @@ class Evaluator:
         label_folder=os.path.join(dataset_folder,"label")
         target_csv_filename=os.path.join(dataset_folder,"validation.csv")
         raw_df = pd.read_csv(target_csv_filename)
+
+        # Create folders
+        execution_name = "execution_"+datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%p")
+        res_path = os.path.join(os.environ["EVALUTAION_FOLDER"],execution_name)
+        pred_vis_path = os.path.join(res_path,'pred_vis')
+        gt_vis_path = os.path.join(res_path,'gt_vis')
+        image_vis_path = os.path.join(res_path,'image_vis')
+        full_vis_path = os.path.join(res_path,'full_vis')
+        safe_make_folder(res_path)
+        safe_make_folder(pred_vis_path)
+        safe_make_folder(gt_vis_path)
+        safe_make_folder(image_vis_path)
+        safe_make_folder(full_vis_path)
         
         filenames = list(raw_df['filename'])
 
