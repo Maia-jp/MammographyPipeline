@@ -54,7 +54,7 @@ class Evaluator:
 
         evaluation_data = []
 
-        with progressbar.ProgressBar(max_value=len(filenames),widgets=[Percentage(), " ", GranularBar(), " ", Timer(), ]) as bar:
+        with ProgressBar(max_value=len(filenames),widgets=[Percentage(), " ", GranularBar(), " ", Timer(), ]) as bar:
             i = 0
             for filename in filenames:
                 #Load Images
