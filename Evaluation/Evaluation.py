@@ -8,7 +8,8 @@ import random
 from skimage import img_as_uint, img_as_float, exposure, draw
 import skimage.io as io
 from datetime import datetime
-import progressbar
+from progressbar import ProgressBar, Percentage, GranularBar, \
+    Timer, ETA, Counter
 
 from ..Util.Util import safe_make_folder
 from ..Util import SQLogger
@@ -53,7 +54,7 @@ class Evaluator:
 
         evaluation_data = []
 
-        with progressbar.ProgressBar(max_value=m) as bar:
+        with progressbar.ProgressBar(max_value=len(filenames),widgets=[Percentage(), " ", GranularBar(), " ", Timer(), ]) as bar:
             i = 0
             for filename in filenames:
                 #Load Images
