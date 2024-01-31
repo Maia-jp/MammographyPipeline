@@ -6,3 +6,4 @@ pip install git+https://github.com/onnx/onnxmltools
 pip install git+https://github.com/onnx/tensorflow-onnx
 pip install -U -q segmentation-models
 pip install python-dotenv
+pip install progressbar2
