@@ -8,6 +8,7 @@ import random
 from skimage import img_as_uint, img_as_float, exposure, draw
 import skimage.io as io
 from datetime import datetime
+import progressbar
 
 from ..Util.Util import safe_make_folder
 from ..Util import SQLogger
@@ -52,57 +53,61 @@ class Evaluator:
 
         evaluation_data = []
 
-        for filename in filenames:
-            #Load Images
-            full_filename = os.path.join(image_folder, filename)
-            full_filename_gt = os.path.join(label_folder, filename)
-            img = io.imread(full_filename)
-            gt_labels = io.imread(full_filename_gt)
+        with progressbar.ProgressBar(max_value=m) as bar:
+            i = 0
+            for filename in filenames:
+                #Load Images
+                full_filename = os.path.join(image_folder, filename)
+                full_filename_gt = os.path.join(label_folder, filename)
+                img = io.imread(full_filename)
+                gt_labels = io.imread(full_filename_gt)
 
-            #Image Preprocessing
-            h_original = img.shape[0]
-            w_original = img.shape[1]
-            img_original = img.copy()
-            img = cv2.resize(img, (384, 384), interpolation=cv2.INTER_NEAREST)
-            img = img.astype(np.float32) / 255.0
-            batch = img.reshape((1, img.shape[0], img.shape[1], 1))
+                #Image Preprocessing
+                h_original = img.shape[0]
+                w_original = img.shape[1]
+                img_original = img.copy()
+                img = cv2.resize(img, (384, 384), interpolation=cv2.INTER_NEAREST)
+                img = img.astype(np.float32) / 255.0
+                batch = img.reshape((1, img.shape[0], img.shape[1], 1))
 
-            #Model Prediction
-            batch_pred = self.model.run(None, {self.model_input_name: batch})[0]
+                #Model Prediction
+                batch_pred = self.model.run(None, {self.model_input_name: batch})[0]
 
-            #Tresholding Mask Generation
-            nipple_mask = batch_pred[0, :, :, 1] > 0.5
-            pectoral_mask = batch_pred[0, :, :, 2] > 0.5
-            fibroglandular_tissue_mask = batch_pred[0, :, :, 3] > 0.5
-            fatty_tissue_mask = batch_pred[0, :, :, 4] > 0.5
-
-
-            nipple_mask_gt = gt_labels==1
-            pectoral_mask_gt = gt_labels==2
-            fibroglandular_tissue_mask_gt = gt_labels==3
-            fatty_tissue_mask_gt = gt_labels==4
-
-            #
-            # Precison
-            #
-            precision_nipple = self.compute_precision(nipple_mask_gt, nipple_mask)
-            precision_pectoral = self.compute_precision(pectoral_mask_gt, pectoral_mask)
-            precision_fibroglandular_tissue = self.compute_precision(fibroglandular_tissue_mask_gt, fibroglandular_tissue_mask)
-            precision_fatty_tissue = self.compute_precision(fatty_tissue_mask_gt, fatty_tissue_mask)
+                #Tresholding Mask Generation
+                nipple_mask = batch_pred[0, :, :, 1] > 0.5
+                pectoral_mask = batch_pred[0, :, :, 2] > 0.5
+                fibroglandular_tissue_mask = batch_pred[0, :, :, 3] > 0.5
+                fatty_tissue_mask = batch_pred[0, :, :, 4] > 0.5
 
 
-            #
-            # Intersection Over Union
-            #
-            nipple_iou = self.compute_iou(nipple_mask_gt, nipple_mask)
-            pectoral_iou = self.compute_iou(pectoral_mask_gt, pectoral_mask)
-            fibroglandular_tissue_iou = self.compute_iou(fibroglandular_tissue_mask_gt, fibroglandular_tissue_mask)
-            fatty_tissue_iou = self.compute_iou(fatty_tissue_mask_gt, fatty_tissue_mask)
+                nipple_mask_gt = gt_labels==1
+                pectoral_mask_gt = gt_labels==2
+                fibroglandular_tissue_mask_gt = gt_labels==3
+                fatty_tissue_mask_gt = gt_labels==4
 
-             # Append Data
-            evaluation_data.append([filename, 
-                                    nipple_iou, pectoral_iou, fibroglandular_tissue_iou, fatty_tissue_iou,
-                                    precision_nipple, precision_pectoral, precision_fibroglandular_tissue, precision_fatty_tissue])
+                #
+                # Precison
+                #
+                precision_nipple = self.compute_precision(nipple_mask_gt, nipple_mask)
+                precision_pectoral = self.compute_precision(pectoral_mask_gt, pectoral_mask)
+                precision_fibroglandular_tissue = self.compute_precision(fibroglandular_tissue_mask_gt, fibroglandular_tissue_mask)
+                precision_fatty_tissue = self.compute_precision(fatty_tissue_mask_gt, fatty_tissue_mask)
+
+
+                #
+                # Intersection Over Union
+                #
+                nipple_iou = self.compute_iou(nipple_mask_gt, nipple_mask)
+                pectoral_iou = self.compute_iou(pectoral_mask_gt, pectoral_mask)
+                fibroglandular_tissue_iou = self.compute_iou(fibroglandular_tissue_mask_gt, fibroglandular_tissue_mask)
+                fatty_tissue_iou = self.compute_iou(fatty_tissue_mask_gt, fatty_tissue_mask)
+
+                # Append Data
+                evaluation_data.append([filename, 
+                                        nipple_iou, pectoral_iou, fibroglandular_tissue_iou, fatty_tissue_iou,
+                                        precision_nipple, precision_pectoral, precision_fibroglandular_tissue, precision_fatty_tissue])
+                i += 1
+                bar.update(i)
 
         # Create DataFrame and save to CSV
         columns = ['filename', 'nipple_iou', 'pectoral_iou', 'fibroglandular_tissue_iou', 'fatty_tissue_iou',

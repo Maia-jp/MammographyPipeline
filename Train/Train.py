@@ -22,7 +22,7 @@ import tf2onnx
 
 from .Generator import CustomGenerator
 from ..Util.Util import safe_make_folder
-from ..Util import SQLogger, Toolbox
+from ..Util import SQLogger
 
 def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
     logger = SQLogger.ExperimentLogger(os.environ["DBLOG_FOLDER"])
