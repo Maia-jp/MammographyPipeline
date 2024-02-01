@@ -27,9 +27,9 @@ class Evaluator:
         self.model_input_name = self.model.get_inputs()[0].name #getting input name for the model
         self.model.run(None, {self.model_input_name: np.zeros((1,384,384,1),dtype=np.float32)})
 
-    def evaluate(self,dataset_evaluation_folder:str = os.environ["EVALUATION_DATASET_FOLDER"]):
+    def evaluate(self,dataset_evaluation_folder:str = os.environ["EVALUATION_DATASET_FOLDER"],evaluation_folder = os.environ["EVALUTAION_FOLDER"]):
         execution_name = "execution_"+datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%p")
-        res_path = os.path.join(dataset_evaluation_folder,execution_name)
+        res_path = os.path.join(evaluation_folder,execution_name)
 
         dataset_folder = dataset_evaluation_folder 
         image_folder=os.path.join(dataset_folder,"image")
@@ -39,7 +39,7 @@ class Evaluator:
 
         # Create folders
         execution_name = "execution_"+datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%p")
-        res_path = os.path.join(dataset_evaluation_folder,execution_name)
+        res_path = os.path.join(evaluation_folder,execution_name)
         pred_vis_path = os.path.join(res_path,'pred_vis')
         gt_vis_path = os.path.join(res_path,'gt_vis')
         image_vis_path = os.path.join(res_path,'image_vis')
