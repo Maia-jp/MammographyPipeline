@@ -16,16 +16,15 @@ from ..Util import SQLogger
 from ..Evaluation import Evaluator
 
 
-class Numeric_Evaluator(Evaluator):
+class Numeric_Evaluator:
 
     def __init__(self,model_path:str):
-        super().__init__(model_path)
-        # self.modelPath = model_path
+        self.modelPath = model_path
 
-        # import onnxruntime as ort
-        # self.model = ort.InferenceSession(model_path, providers=['CUDAExecutionProvider']) #loading model
-        # self.model_input_name = self.model.get_inputs()[0].name #getting input name for the model
-        # self.model.run(None, {self.model_input_name: np.zeros((1,384,384,1),dtype=np.float32)})
+        import onnxruntime as ort
+        self.model = ort.InferenceSession(model_path, providers=['CUDAExecutionProvider']) #loading model
+        self.model_input_name = self.model.get_inputs()[0].name #getting input name for the model
+        self.model.run(None, {self.model_input_name: np.zeros((1,384,384,1),dtype=np.float32)})
 
     def evaluate(self,evaluation_folder:str = os.environ["EVALUTAION_FOLDER"],dataset_evaluation_folder:str = os.environ["EVALUATION_DATASET_FOLDER"]) -> pd.DataFrame:
         execution_name = "execution_"+datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%p")
