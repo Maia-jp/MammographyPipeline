@@ -18,6 +18,14 @@ from ..Evaluation import Evaluator
 
 class Numeric_Evaluator(Evaluator):
 
+    def __init__(self,model_path:str):
+        self.modelPath = model_path
+
+        import onnxruntime as ort
+        self.model = ort.InferenceSession(model_path, providers=['CUDAExecutionProvider']) #loading model
+        self.model_input_name = self.model.get_inputs()[0].name #getting input name for the model
+        self.model.run(None, {self.model_input_name: np.zeros((1,384,384,1),dtype=np.float32)})
+
     def evaluate(self,evaluation_folder:str = os.environ["EVALUTAION_FOLDER"],dataset_evaluation_folder:str = os.environ["EVALUATION_DATASET_FOLDER"]) -> pd.DataFrame:
         execution_name = "execution_"+datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%p")
         res_path = os.path.join(evaluation_folder,execution_name)
@@ -185,3 +193,7 @@ class Numeric_Evaluator(Evaluator):
         hausdorff_distance = max(hausdorff_distance_gt_pred, hausdorff_distance_pred_gt)
 
         return hausdorff_distance
+    
+
+
+evaluator = Numeric_Evaluator(modelPath="/content/drive/MyDrive/Faculdade/TCC/Execuções/1951_29_01_2024/data/results/training/execution_2024_01_29_20_41_46_PM/model.onnx")
