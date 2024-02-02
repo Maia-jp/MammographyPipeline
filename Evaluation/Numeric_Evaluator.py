@@ -113,13 +113,21 @@ class Numeric_Evaluator(Evaluator):
                 # Append Data
                 evaluation_data.append([filename, 
                                         nipple_iou, pectoral_iou, fibroglandular_tissue_iou, fatty_tissue_iou,
-                                        precision_nipple, precision_pectoral, precision_fibroglandular_tissue, precision_fatty_tissue])
+                                        precision_nipple, precision_pectoral, precision_fibroglandular_tissue, precision_fatty_tissue,
+                                        accuracy_nipple,accuracy_pectoral,accuracy_fibroglandular_tissue,accuracy_fatty_tissue,
+                                        dice_nipple,dice_pectoral,dice_fibroglandular_tissue,dice_fatty_tissue,
+                                        hausdorff_nipple,hausdorff_pectoral,hausdorff_fibroglandular_tissue,hausdorff_fatty_tissue])
                 i += 1
                 bar.update(i)
 
         # Create DataFrame and save to CSV
-        columns = ['filename', 'nipple_iou', 'pectoral_iou', 'fibroglandular_tissue_iou', 'fatty_tissue_iou',
-                        'precision_nipple', 'precision_pectoral', 'precision_fibroglandular_tissue', 'precision_fatty_tissue']
+        columns = ['filename',
+                    'nipple_iou', 'pectoral_iou', 'fibroglandular_tissue_iou', 'fatty_tissue_iou',
+                    'precision_nipple', 'precision_pectoral', 'precision_fibroglandular_tissue', 'precision_fatty_tissue',
+                    'accuracy_nipple', 'accuracy_pectoral', 'accuracy_fibroglandular_tissue', 'accuracy_fatty_tissue',
+                    'dice_nipple', 'dice_pectoral', 'dice_fibroglandular_tissue', 'dice_fatty_tissue',
+                    'hausdorff_nipple', 'hausdorff_pectoral', 'hausdorff_fibroglandular_tissue', 'hausdorff_fatty_tissue']
+
 
 
         result_df = pd.DataFrame(evaluation_data, columns=columns)
