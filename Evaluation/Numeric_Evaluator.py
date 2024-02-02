@@ -113,18 +113,17 @@ class Numeric_Evaluator:
                 dice_fatty_tissue = self.compute_dice_coeff(fatty_tissue_mask_gt, fatty_tissue_mask)
 
                 # Hausdorff Distance
-                hausdorff_nipple = self.compute_Hausdorff_distance(nipple_mask_gt, nipple_mask)
-                hausdorff_pectoral = self.compute_Hausdorff_distance(pectoral_mask_gt, pectoral_mask)
-                hausdorff_fibroglandular_tissue = self.compute_Hausdorff_distance(fibroglandular_tissue_mask_gt, fibroglandular_tissue_mask)
-                hausdorff_fatty_tissue = self.compute_Hausdorff_distance(fatty_tissue_mask_gt, fatty_tissue_mask)
+                # hausdorff_nipple = self.compute_Hausdorff_distance(nipple_mask_gt, nipple_mask)
+                # hausdorff_pectoral = self.compute_Hausdorff_distance(pectoral_mask_gt, pectoral_mask)
+                # hausdorff_fibroglandular_tissue = self.compute_Hausdorff_distance(fibroglandular_tissue_mask_gt, fibroglandular_tissue_mask)
+                # hausdorff_fatty_tissue = self.compute_Hausdorff_distance(fatty_tissue_mask_gt, fatty_tissue_mask)
 
                 # Append Data
                 evaluation_data.append([filename, 
                                         nipple_iou, pectoral_iou, fibroglandular_tissue_iou, fatty_tissue_iou,
                                         precision_nipple, precision_pectoral, precision_fibroglandular_tissue, precision_fatty_tissue,
                                         accuracy_nipple,accuracy_pectoral,accuracy_fibroglandular_tissue,accuracy_fatty_tissue,
-                                        dice_nipple,dice_pectoral,dice_fibroglandular_tissue,dice_fatty_tissue,
-                                        hausdorff_nipple,hausdorff_pectoral,hausdorff_fibroglandular_tissue,hausdorff_fatty_tissue])
+                                        dice_nipple,dice_pectoral,dice_fibroglandular_tissue,dice_fatty_tissue])
                 i += 1
                 bar.update(i)
 
@@ -133,8 +132,7 @@ class Numeric_Evaluator:
                     'nipple_iou', 'pectoral_iou', 'fibroglandular_tissue_iou', 'fatty_tissue_iou',
                     'precision_nipple', 'precision_pectoral', 'precision_fibroglandular_tissue', 'precision_fatty_tissue',
                     'accuracy_nipple', 'accuracy_pectoral', 'accuracy_fibroglandular_tissue', 'accuracy_fatty_tissue',
-                    'dice_nipple', 'dice_pectoral', 'dice_fibroglandular_tissue', 'dice_fatty_tissue',
-                    'hausdorff_nipple', 'hausdorff_pectoral', 'hausdorff_fibroglandular_tissue', 'hausdorff_fatty_tissue']
+                    'dice_nipple', 'dice_pectoral', 'dice_fibroglandular_tissue', 'dice_fatty_tissue']
 
 
 
@@ -180,20 +178,3 @@ class Numeric_Evaluator:
         union = np.sum(np.logical_or(gt_mask, pred_mask))
         dice_coefficient = (2.0 * intersection) / (union + 1e-9)  # to avoid division by zero
         return dice_coefficient
-
-    def compute_Hausdorff_distance(self, gt_mask, pred_mask):
-        from skimage.measure import find_contour
-        from scipy.spatial.distance import directed_hausdorff
-        gt_contour = find_contour(gt_mask)
-        pred_contour = find_contour(pred_mask)
-
-        hausdorff_distance_gt_pred = directed_hausdorff(gt_contour, pred_contour)[0]
-        hausdorff_distance_pred_gt = directed_hausdorff(pred_contour, gt_contour)[0]
-
-        hausdorff_distance = max(hausdorff_distance_gt_pred, hausdorff_distance_pred_gt)
-
-        return hausdorff_distance
-    
-
-
-evaluator = Numeric_Evaluator(modelPath="/content/drive/MyDrive/Faculdade/TCC/Execuções/1951_29_01_2024/data/results/training/execution_2024_01_29_20_41_46_PM/model.onnx")
