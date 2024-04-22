@@ -106,28 +106,55 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
 import tensorflow as tf
 from transformers import SegformerFeatureExtractor, SegformerForSemanticSegmentation, Trainer, TrainingArguments
 from torch.utils.data import Dataset
+from .Generator import SegformerDataset
 def train_segformer(dataset_folder=os.environ["DATASET_FOLDER"]):
     logger = SQLogger.ExperimentLogger(os.environ["DBLOG_FOLDER"])
 
-    # ... (GPU configuration - same as before) ...
+    gpus = tf.config.experimental.list_physical_devices('GPU')
+    if gpus:
+        try:
+            for gpu in gpus:
+                tf.config.experimental.set_memory_growth(gpu, True)
+
+            if(len(gpus) > 1 ):
+                #mirrored_strategy = tf.distribute.MirroredStrategy()
+                tf.config.experimental.set_visible_devices(gpus[1], 'GPU')
+            logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+            print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+
+        except RuntimeError as e:
+            # Memory growth must be set before GPUs have been initialized
+            print(e)
 
     execution_name = "execution_" + datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%p")
     training_results_folder = os.environ["RESULTS_FOLDER"] + execution_name
     safe_make_folder(training_results_folder)
 
-    # ... (Define image_folder, label_folder, csv filenames - same as before) ...
+    image_folder=os.path.join(dataset_folder,"image")
+    label_folder=os.path.join(dataset_folder,"label")
+    training_csv_filename=os.path.join(dataset_folder,"training.csv")
+    validation_csv_filename=os.path.join(dataset_folder,"validation.csv")
 
     # Define feature extractor, model, and augmentation
     model_name = "nvidia/segformer-b0-finetuned-ade-512-512"
     feature_extractor = SegformerFeatureExtractor.from_pretrained(model_name)
     model = SegformerForSemanticSegmentation.from_pretrained(model_name, num_labels=5)
-    augmentation = ...  # Define your augmentation function here
+    # augmentation = ...  # Define your augmentation function here TODO
 
     # Create datasets
-    train_dataset = SegformerDataset(training_csv_filename, image_folder, label_folder, feature_extractor, augmentation=augmentation)
+    train_dataset = SegformerDataset(training_csv_filename, image_folder, label_folder, feature_extractor)
     validation_dataset = SegformerDataset(validation_csv_filename, image_folder, label_folder, feature_extractor)
 
-    # ... (Define training_args - same as before) ...
+    training_args = TrainingArguments(
+        output_dir=training_results_folder,  # Output directory
+        do_train=True,  # Run training
+        do_eval=True,  # Run evaluation on the validation set
+        evaluation_strategy="epoch",  # Evaluate at the end of each epoch
+        per_device_train_batch_size=8,  # Batch size per device during training
+        per_device_eval_batch_size=8,  # Batch size per device during evaluation
+        num_train_epochs=int(os.environ["EPOCHS"]),  # Total number of training epochs
+        # (Add other essential arguments as needed, such as learning rate, optimizer, etc.)
+    )
 
     # Create Trainer instance
     trainer = Trainer(
@@ -135,7 +162,7 @@ def train_segformer(dataset_folder=os.environ["DATASET_FOLDER"]):
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=validation_dataset,
-        compute_metrics=compute_metrics,
+        # compute_metrics=compute_metrics,
     )
 
     # Start training
