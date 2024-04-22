@@ -12,3 +12,5 @@ Keras-Applications==1.0.8
 efficientnet==1.0.0
 segmentation-models
 progressbar2
+transformers
+datasets

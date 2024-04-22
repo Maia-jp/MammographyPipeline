@@ -100,3 +100,52 @@ def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
     onnx_model_ss_structures_of_interest = onnxmltools.convert_keras(model, target_opset=12)
     onnxmltools.utils.save_model(onnx_model_ss_structures_of_interest, os.path.join(training_results_folder,'model.onnx'))
     return model, os.path.join(training_results_folder,'model.onnx')
+
+
+
+import tensorflow as tf
+from transformers import SegformerFeatureExtractor, SegformerForSemanticSegmentation, Trainer, TrainingArguments
+from torch.utils.data import Dataset
+def train_segformer(dataset_folder=os.environ["DATASET_FOLDER"]):
+    logger = SQLogger.ExperimentLogger(os.environ["DBLOG_FOLDER"])
+
+    # ... (GPU configuration - same as before) ...
+
+    execution_name = "execution_" + datetime.now().strftime("%Y_%m_%d_%H_%M_%S_%p")
+    training_results_folder = os.environ["RESULTS_FOLDER"] + execution_name
+    safe_make_folder(training_results_folder)
+
+    # ... (Define image_folder, label_folder, csv filenames - same as before) ...
+
+    # Define feature extractor, model, and augmentation
+    model_name = "nvidia/segformer-b0-finetuned-ade-512-512"
+    feature_extractor = SegformerFeatureExtractor.from_pretrained(model_name)
+    model = SegformerForSemanticSegmentation.from_pretrained(model_name, num_labels=5)
+    augmentation = ...  # Define your augmentation function here
+
+    # Create datasets
+    train_dataset = SegformerDataset(training_csv_filename, image_folder, label_folder, feature_extractor, augmentation=augmentation)
+    validation_dataset = SegformerDataset(validation_csv_filename, image_folder, label_folder, feature_extractor)
+
+    # ... (Define training_args - same as before) ...
+
+    # Create Trainer instance
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=validation_dataset,
+        compute_metrics=compute_metrics,
+    )
+
+    # Start training
+    trainer.train()
+
+    # ... (Log training results as needed) ...
+
+    # Save the model
+    model.save_pretrained(training_results_folder)  # Saves in Hugging Face format
+    # (Optional) Convert and save the model in ONNX format
+    # ...
+
+    return model, training_results_folder  # Return the model and path to saved model
