@@ -20,7 +20,7 @@ from ..Util.Util import safe_make_folder
 from ..Util import SQLogger
 
 
-def train_UNET(dataset_folder = os.environ["DATASET_FOLDER"]):
+def train(dataset_folder = os.environ["DATASET_FOLDER"]):
     feature_extractor = SegformerFeatureExtractor.from_pretrained("nvidia/segformer-b0-finetuned-ade-512-512")
     feature_extractor.do_reduce_labels = False
     feature_extractor.size = 128
