@@ -30,6 +30,21 @@ class SegformerFinetuner(pl.LightningModule):
         self.val_mean_iou = load_metric("mean_iou")
         self.test_mean_iou = load_metric("mean_iou")
 
+
+    def load_from_checkpoint_and_finetune(self, checkpoint_path, train_dataloader, val_dataloader):
+        """
+        Loads a model from a checkpoint and prepares for further fine-tuning.
+        
+        Args:
+            checkpoint_path (str): Path to the checkpoint file.
+            train_dataloader (DataLoader): Dataloader for training data.
+            val_dataloader (DataLoader): Dataloader for validation data.
+        """
+        self = SegformerFinetuner.load_from_checkpoint(checkpoint_path, 
+                                                       train_dataloader=train_dataloader,
+                                                       val_dataloader=val_dataloader)
+        return self
+
     def forward(self, images, masks):
         outputs = self.model(pixel_values=images, labels=masks)
         return(outputs)
