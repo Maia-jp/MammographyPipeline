@@ -43,7 +43,7 @@ class SemanticSegmentationDataset(Dataset):
       # Iterate over filenames in the CSV
       for filename in filenames:
           # Image path
-          image_path = os.path.join(self.root_dir, "image", f"{filename}")
+          image_path = os.path.join(self.root_dir, "image", f"{filename}.png")
           if os.path.exists(image_path):
               self.images.append(image_path)
 
